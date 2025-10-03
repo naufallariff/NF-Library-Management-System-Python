@@ -1,172 +1,176 @@
 from core.data_manager import get_all_data, save_all_data
 from core.utils import clear_screen
-
-# PERBAIKAN: Impor search_and_select dari core.validation
-from core.validation import validate_input_str, validate_input_int, search_and_select 
+from core.validation import validate_input_str, validate_input_int, search_and_select
 from core.calculations import calculate_fine
 import time
 import random 
 
-# Import Helper dari modul handler lain untuk UI
-from handlers.anggota_handler import _prompt_and_select_anggota
-from handlers.buku_handler import _prompt_and_select_buku
+# Mengimpor Helper dari modul handler lain untuk UI pencarian
+from handlers.member_handler import _prompt_and_select_member
+from handlers.book_handler import _prompt_and_select_book
 
 # --- CORE LOGIC: PINJAM & KEMBALI ---
-def _execute_transaction(tipe_proses):
-    """Fungsi inti untuk memproses pinjaman atau pengembalian dengan manajemen stok dan riwayat."""
+
+def _execute_transaction(transaction_type):
+    """Fungsi inti untuk memproses peminjaman atau pengembalian dengan manajemen stok dan riwayat."""
     clear_screen()
     data = get_all_data()
-    proses_nama = "PEMINJAMAN" if tipe_proses == 'pinjam' else "PENGEMBALIAN"
-    print(f'\n*** {proses_nama} BUKU ***')
     
-    # 1. Pilih Buku (Menggunakan UI Cari/Pilih)
-    print("\n[Select Book]")
-    kode_buku, buku = _prompt_and_select_buku(data)
-    if not buku: return
+    # Menentukan nama proses untuk tampilan CLI
+    process_name = "PEMINJAMAN" if transaction_type == 'loan' else "PENGEMBALIAN"
+    print(f'\n*** {process_name} BUKU ***')
+    
+    # 1. Pilih Buku menggunakan UX pencarian
+    print("\n[Pilih Buku]")
+    book_code, book = _prompt_and_select_book(data)
+    if not book: return
 
-    # 2. Pilih Anggota (Menggunakan UI Cari/Pilih)
-    print("\n[Select Member]")
-    kode_anggota, anggota = _prompt_and_select_anggota(data)
-    if not anggota: return
+    # 2. Pilih Anggota menggunakan UX pencarian
+    print("\n[Pilih Anggota]")
+    member_code, member = _prompt_and_select_member(data)
+    if not member: return
         
-    # --- LOGIKA PINJAM ---
-    if tipe_proses == 'pinjam':
-        if buku['stok'] <= 0:
-            print(f"Stock for '{buku['judul']}' is zero. Loan failed.")
+    # --- LOGIKA PINJAM (LOAN) ---
+    if transaction_type == 'loan':
+        if book['stok'] <= 0:
+            print(f"Stok untuk '{book['judul']}' kosong. Peminjaman gagal.")
             return
             
-        peminjam_list = data['peminjaman'].get(kode_buku, [])
-        if kode_anggota in peminjam_list:
-            print(f"Member {anggota['nama']} has already borrowed this book.")
+        loan_list = data['loan_active'].get(book_code, [])
+        if member_code in loan_list:
+            print(f"Anggota {member['nama']} sudah meminjam buku ini.")
             return
 
-        buku['stok'] -= 1
+        # Update Stok dan mencatat ke loan_active
+        book['stok'] -= 1
         
-        if kode_buku not in data['peminjaman']:
-            data['peminjaman'][kode_buku] = []
-        data['peminjaman'][kode_buku].append(kode_anggota)
-        print(f"\nLoan successful: '{buku['judul']}' by {anggota['nama']}. Stock remaining: {buku['stok']}.")
+        if book_code not in data['loan_active']:
+            data['loan_active'][book_code] = []
+        data['loan_active'][book_code].append(member_code)
+        
+        print(f"\nPeminjaman berhasil: '{book['judul']}' oleh {member['nama']}. Sisa Stok: {book['stok']}.")
     
-    # --- LOGIKA KEMBALI (COMPLETE RETURN) ---
-    elif tipe_proses == 'kembali':
-        peminjam_list = data['peminjaman'].get(kode_buku, [])
-        if kode_anggota not in peminjam_list:
-            print("This book is not currently loaned by this member. Return failed.")
+    # --- LOGIKA KEMBALI (RETURN) ---
+    elif transaction_type == 'return':
+        loan_list = data['loan_active'].get(book_code, [])
+        if member_code not in loan_list:
+            print("Buku ini tidak sedang dipinjam oleh anggota tersebut. Pengembalian gagal.")
             return
 
-        terlambat = validate_input_int("Days late (0 if on time): ")
-        total_denda = calculate_fine(anggota['jenis_anggota'], terlambat) 
+        days_late = validate_input_int("Keterlambatan (hari, 0 jika tepat waktu): ")
+        total_fine = calculate_fine(member['jenis_anggota'], days_late) 
         
         # Log transaksi ke history
         history_id = str(int(time.time())) + str(random.randint(100, 999)) 
-        data['history'][history_id] = {
-            'book_code': kode_buku,
-            'member_code': kode_anggota,
-            'fine_paid': total_denda,
-            'days_late': terlambat,
+        data['loan_history'][history_id] = {
+            'book_code': book_code,
+            'member_code': member_code,
+            'fine_paid': total_fine,
+            'days_late': days_late,
             'completed_date': time.strftime("%Y-%m-%d %H:%M:%S")
         }
-        
+
         # Update stok dan hapus dari daftar pinjaman aktif
-        buku['stok'] += 1
-        data['peminjaman'][kode_buku].remove(kode_anggota)
+        book['stok'] += 1
+        data['loan_active'][book_code].remove(member_code)
         
-        if not data['peminjaman'][kode_buku]:
-            del data['peminjaman'][kode_buku]
+        if not data['loan_active'][book_code]:
+            del data['loan_active'][book_code]
             
-        print(f"\nReturn successful: '{buku['judul']}' by {anggota['nama']}. Transaction logged to history.")
+        print(f"\nPengembalian berhasil: '{book['judul']}' oleh {member['nama']}. Transaksi dicatat ke riwayat.")
 
     save_all_data(data)
 
 def create_loan():
     """Memulai proses peminjaman buku."""
-    _execute_transaction('pinjam')
+    _execute_transaction('loan')
 
 def complete_return():
     """Menyelesaikan proses pengembalian buku."""
-    _execute_transaction('kembali')
+    _execute_transaction('return')
 
 # --- DELETE TRANSAKSI (PENGEMBALIAN PAKSA) ---
 
 def delete_loan_entry():
-    """Menghapus entri peminjaman secara paksa dan mencatatnya sebagai riwayat dengan catatan khusus."""
+    """Menghapus entri pinjaman secara paksa (pengembalian paksa) dan mencatatnya ke riwayat."""
     clear_screen()
-    print('\n*** DELETE LOAN ENTRY (FORCED RETURN) ***')
+    print('\n*** HAPUS ENTRI PINJAMAN (PENGEMBALIAN PAKSA) ***')
     data = get_all_data()
 
     # 1. Pilih Buku yang sedang dipinjam
+    # Hanya tampilkan buku yang ada di daftar pinjaman aktif
     borrowed_books_data = {
-        k: data['buku'][k] for k in data['peminjaman'] if k in data['buku']
+        code: data['book'][code] for code in data['loan_active'] if code in data['book']
     }
     
     if not borrowed_books_data:
-        print("No books are currently on loan.")
+        print("Tidak ada buku yang sedang dipinjam.")
         return
     
-    print("\n[Select Book to Return]")
-    kode_buku = search_and_select(borrowed_books_data, 'judul', "Search Book Title (or 'X' to cancel): ", "Book not found.")
-    if not kode_buku: return
+    print("\n[Pilih Buku yang akan Dikembalikan]")
+    book_code = search_and_select(borrowed_books_data, 'judul', "Cari Judul Buku (atau 'X' untuk batal): ", "Buku tidak ditemukan.")
+    if not book_code: return
     
-    buku = data['buku'][kode_buku]
+    book = data['book'][book_code]
 
-    # 2. Pilih Anggota yang meminjam
+    # 2. Pilih Anggota yang meminjam buku tersebut
     current_borrowers = {
-        k: data['anggota'][k] for k in data['peminjaman'][kode_buku] if k in data['anggota']
+        code: data['member'][code] for code in data['loan_active'][book_code] if code in data['member']
     }
     
-    print("\n[Select Member Returning]")
-    kode_anggota = search_and_select(current_borrowers, 'nama', "Search Member Name (or 'X' to cancel): ", "Member not found.")
-    if not kode_anggota: return
+    print("\n[Pilih Anggota yang Mengembalikan]")
+    member_code = search_and_select(current_borrowers, 'nama', "Cari Nama Anggota (atau 'X' untuk batal): ", "Anggota tidak ditemukan.")
+    if not member_code: return
     
-    anggota = data['anggota'][kode_anggota]
+    member = data['member'][member_code]
     
     # 3. Proses Pengembalian/Penghapusan
-    terlambat = validate_input_int("Days late (0 if on time): ")
-    total_denda = calculate_fine(anggota['jenis_anggota'], terlambat) 
+    days_late = validate_input_int("Keterlambatan (hari, 0 jika tepat waktu): ")
+    total_fine = calculate_fine(member['jenis_anggota'], days_late) 
 
     # LOGGING HISTORY DENGAN CATATAN KHUSUS
     history_id = str(int(time.time())) + str(random.randint(100, 999)) 
-    data['history'][history_id] = {
-        'book_code': kode_buku,
-        'member_code': kode_anggota,
-        'fine_paid': total_denda,
-        'days_late': terlambat,
+    data['loan_history'][history_id] = {
+        'book_code': book_code,
+        'member_code': member_code,
+        'fine_paid': total_fine,
+        'days_late': days_late,
         'completed_date': time.strftime("%Y-%m-%d %H:%M:%S"),
-        'notes': 'Forced Return/Loan Delete by Admin'
+        'notes': 'Pengembalian Paksa oleh Admin'
     }
 
-    # 4. Hapus dari peminjaman aktif & update stok
-    data['buku'][kode_buku]['stok'] += 1
-    data['peminjaman'][kode_buku].remove(kode_anggota)
+    # 4. Hapus dari pinjaman aktif & update stok
+    data['book'][book_code]['stok'] += 1
+    data['loan_active'][book_code].remove(member_code)
     
-    if not data['peminjaman'][kode_buku]:
-        del data['peminjaman'][kode_buku]
+    if not data['loan_active'][book_code]:
+        del data['loan_active'][book_code]
         
-    print(f"\nLoan entry for '{buku['judul']}' by {anggota['nama']} successfully deleted/resolved and logged to history.")
+    print(f"\nEntri pinjaman untuk '{book['judul']}' oleh {member['nama']} berhasil dihapus dan dicatat ke riwayat.")
     save_all_data(data)
 
 # --- READ TRANSAKSI (View Peminjam Aktif) ---
 
 def view_loan_list():
-    """Menampilkan daftar semua buku yang sedang dipinjam."""
+    """Menampilkan daftar semua buku yang sedang dipinjam (pinjaman aktif)."""
     clear_screen()
     print('='*10, 'DAFTAR PEMINJAM AKTIF', '='*10)
     
     data = get_all_data()
     
-    if not data['peminjaman']:
-        print("No books are currently on loan.")
+    if not data['loan_active']:
+        print("Tidak ada buku yang sedang dipinjam saat ini.")
         return
 
-    for kode_buku, list_peminjam in data['peminjaman'].items():
-        buku = data['buku'].get(kode_buku, {'judul': '[Title Not Found]', 'penulis': 'N/A'})
+    for book_code, member_list in data['loan_active'].items():
+        book = data['book'].get(book_code, {'judul': '[Judul Tidak Ditemukan]', 'penulis': 'N/A'})
         
-        print(f"Judul: {buku['judul']}")
-        print(f"Penulis: {buku['penulis']}")
+        print(f"Judul: {book['judul']}")
+        print(f"Penulis: {book['penulis']}")
         print("Daftar Peminjam:")
         
-        for i, kode_anggota in enumerate(list_peminjam, 1):
-            anggota = data['anggota'].get(kode_anggota, {'nama': 'Unknown Member', 'jenis_anggota': 0})
-            grup_label = '(*NF Group)' if anggota['jenis_anggota'] == 1 else ''
-            print(f"{i}. {anggota['nama']} {grup_label} (Code: {kode_anggota})")
+        for i, member_code in enumerate(member_list, 1):
+            member = data['member'].get(member_code, {'nama': 'Anggota Tidak Dikenal', 'jenis_anggota': 0})
+            group_label = '(*NF Group)' if member['jenis_anggota'] == 1 else ''
+            print(f"{i}. {member['nama']} {group_label} (Kode: {member_code})")
         print("-" * 30)

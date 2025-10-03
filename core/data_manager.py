@@ -1,27 +1,31 @@
-# core/data_manager.py (Diperbarui)
-
 import json
 import os
 
-# Menentukan jalur file di dalam folder 'data/'
+# Mendefinisikan nama dan path file JSON
 DATA_DIR = 'data'
-ANGGOTA_FILE = os.path.join(DATA_DIR, 'anggota.json')
-BUKU_FILE = os.path.join(DATA_DIR, 'buku.json')
-PEMINJAMAN_FILE = os.path.join(DATA_DIR, 'peminjaman.json')
-HISTORY_FILE = os.path.join(DATA_DIR, 'history.json') 
+MEMBER_FILE = os.path.join(DATA_DIR, 'member.json')
+BOOK_FILE = os.path.join(DATA_DIR, 'book.json')
+LOAN_ACTIVE_FILE = os.path.join(DATA_DIR, 'loan_active.json')
+LOAN_HISTORY_FILE = os.path.join(DATA_DIR, 'loan_history.json') 
 
 def load_data(filename):
-    """Membaca data dari file JSON."""
+    """
+    Membaca data dari file JSON.
+    Ini juga membuat folder 'data' jika belum ada.
+    """
     if not os.path.exists(DATA_DIR):
         os.makedirs(DATA_DIR)
         
     try:
         with open(filename, 'r') as f:
+            # Mengembalikan data jika file ada dan isinya valid
             return json.load(f)
     except FileNotFoundError:
+        # Mengembalikan dictionary kosong jika file belum ada
         return {}
     except json.JSONDecodeError:
-        print(f"[{os.path.basename(filename)}] Data file corrupted. Initializing empty dictionary.")
+        # Mengembalikan dictionary kosong jika file rusak/kosong
+        print(f"[{os.path.basename(filename)}] File data rusak. Menginisialisasi dengan data kosong.")
         return {}
 
 def save_data(data, filename):
@@ -32,21 +36,23 @@ def save_data(data, filename):
     try:
         with open(filename, 'w') as f:
             json.dump(data, f, indent=4)
-    except IOError as e:
-        print(f"Error: Could not save data to {os.path.basename(filename)}: {e}")
+    except IOError as error:
+        print(f"Error: Tidak dapat menyimpan data ke {os.path.basename(filename)}: {error}")
 
 def get_all_data():
-    """Mengambil semua data aplikasi dari disk, termasuk history."""
+    """Mengambil semua data aplikasi dari disk."""
+    # Mengubah nama key dictionary sesuai dengan nama file
     return {
-        'anggota': load_data(ANGGOTA_FILE),
-        'buku': load_data(BUKU_FILE),
-        'peminjaman': load_data(PEMINJAMAN_FILE),
-        'history': load_data(HISTORY_FILE) 
+        'member': load_data(MEMBER_FILE),
+        'book': load_data(BOOK_FILE),
+        'loan_active': load_data(LOAN_ACTIVE_FILE),
+        'loan_history': load_data(LOAN_HISTORY_FILE) 
     }
 
 def save_all_data(data):
-    """Menyimpan semua data aplikasi ke disk, termasuk history."""
-    save_data(data['anggota'], ANGGOTA_FILE)
-    save_data(data['buku'], BUKU_FILE)
-    save_data(data['peminjaman'], PEMINJAMAN_FILE)
-    save_data(data['history'], HISTORY_FILE)
+    """Menyimpan semua data aplikasi ke disk."""
+    # Menyimpan data berdasarkan key dictionary
+    save_data(data['member'], MEMBER_FILE)
+    save_data(data['book'], BOOK_FILE)
+    save_data(data['loan_active'], LOAN_ACTIVE_FILE)
+    save_data(data['loan_history'], LOAN_HISTORY_FILE)
