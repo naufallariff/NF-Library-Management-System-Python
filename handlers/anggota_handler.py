@@ -1,11 +1,10 @@
 from core.data_manager import get_all_data, save_all_data
 from core.utils import generate_kode_anggota, clear_screen
-from core.validation import validate_input_str
+from core.validation import validate_input_str, search_and_select
 
 # Helper untuk Anggota (Cari & Pilih)
 def _prompt_and_select_anggota(data):
-    """Membantu pengguna mencari dan memilih anggota."""
-    from core.validation import search_and_select
+    """Membantu pengguna mencari dan memilih anggota berdasarkan kata kunci."""
     
     key_attr = 'nama'
     search_prompt = "Cari Nama Anggota (atau 'X' untuk batal): "
@@ -116,7 +115,7 @@ def delete_anggota():
             break
             
     if is_borrowing:
-        print(f"\n[CONFLICT] Member {anggota['nama']} is currently borrowing books. Cannot delete!")
+        print(f"\n[CONFLICT] Member {anggota['nama']} masih memiliki pinjaman buku. Tidak bisa dihapus sekarang!")
         return
 
     konfirmasi = input(f"Confirm deletion of {anggota['nama']} ({kode_anggota})? (Y/T): ").upper()

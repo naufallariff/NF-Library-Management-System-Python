@@ -32,7 +32,7 @@ def print_menu_header(title):
 def menu():
     clear_screen()
     while True:
-        print_menu_header("NF LIBRARY MANAGEMENT SYSTEM (MODULAR)")
+        print_menu_header("NF LIBRARY MANAGEMENT SYSTEM")
         
         print('| --- [ MANAJEMEN ANGGOTA (MEMBER CRUD) ] ---          |')
         print('| [1] Buat Anggota Baru (Create)                       |')

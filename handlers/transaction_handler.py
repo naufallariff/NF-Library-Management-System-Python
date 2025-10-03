@@ -1,8 +1,8 @@
-# handlers/transaction_handler.py
-
 from core.data_manager import get_all_data, save_all_data
 from core.utils import clear_screen
-from core.validation import validate_input_str, validate_input_int, search_and_select
+
+# PERBAIKAN: Impor search_and_select dari core.validation
+from core.validation import validate_input_str, validate_input_int, search_and_select 
 from core.calculations import calculate_fine
 import time
 import random 
@@ -12,7 +12,6 @@ from handlers.anggota_handler import _prompt_and_select_anggota
 from handlers.buku_handler import _prompt_and_select_buku
 
 # --- CORE LOGIC: PINJAM & KEMBALI ---
-
 def _execute_transaction(tipe_proses):
     """Fungsi inti untuk memproses pinjaman atau pengembalian dengan manajemen stok dan riwayat."""
     clear_screen()

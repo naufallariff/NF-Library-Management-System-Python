@@ -1,7 +1,8 @@
 import random
 import string
 import os
-from data_manager import get_all_data
+
+from .data_manager import get_all_data 
 
 def clear_screen():
     """Membersihkan layar terminal. Ditempatkan di sini karena ini adalah utilitas umum."""

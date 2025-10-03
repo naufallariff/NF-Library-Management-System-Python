@@ -1,21 +1,20 @@
 from core.data_manager import get_all_data, save_all_data
 from core.utils import generate_kode_buku, clear_screen
-from core.validation import validate_input_str, validate_input_int
+from core.validation import validate_input_str, validate_input_int, search_and_select
 
 # Helper untuk Buku (Cari & Pilih)
 def _prompt_and_select_buku(data):
     """Membantu pengguna mencari dan memilih buku berdasarkan kata kunci."""
-    from core.validation import search_and_select 
-    
+
     key_attr = 'judul'
     search_prompt = "Cari Judul Buku (atau 'X' untuk batal): "
     not_found_msg = "Buku tidak ditemukan."
-        
+
     kode = search_and_select(data['buku'], key_attr, search_prompt, not_found_msg)
-    
+
     if kode is None:
         return None, None
-        
+
     return kode, data['buku'].get(kode)
 
 # --- CREATE ---
@@ -112,7 +111,7 @@ def delete_buku():
     # Cek Konflik: Buku tidak boleh dihapus jika masih dipinjam
     if kode_buku in data['peminjaman'] and data['peminjaman'][kode_buku]:
         num_borrowers = len(data['peminjaman'][kode_buku])
-        print(f"\n[CONFLICT] Book '{buku['judul']}' is currently borrowed by {num_borrowers} members. Cannot delete!")
+        print(f"\n[CONFLICT] Buku '{buku['judul']}' masih dipinjam oleh {num_borrowers} orang member. Tidak bisa dihapus sekarang!")
         return
 
     konfirmasi = input(f"Confirm deletion of '{buku['judul']}' ({kode_buku})? (Y/T): ").upper()
