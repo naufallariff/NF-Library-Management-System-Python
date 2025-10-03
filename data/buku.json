@@ -1,0 +1,32 @@
+{
+    "TER101": {
+        "judul": "Hujan",
+        "penulis": "Tere Liye",
+        "stok": 5
+    },
+    "JKR999": {
+        "judul": "Harry Potter dan Batu Bertuah",
+        "penulis": "J.K. Rowling",
+        "stok": 1
+    },
+    "AND500": {
+        "judul": "Laskar Pelangi",
+        "penulis": "Andrea Hirata",
+        "stok": 0
+    },
+    "CHR045": {
+        "judul": "Murder on the Orient Express",
+        "penulis": "Agatha Christie",
+        "stok": 8
+    },
+    "PJM707": {
+        "judul": "Filosofi Teras",
+        "penulis": "Henry Manampiring",
+        "stok": 3
+    },
+    "LUQ289": {
+        "judul": "Homo sapiens",
+        "penulis": "Luqman",
+        "stok": 20
+    }
+}

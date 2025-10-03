@@ -1,0 +1,26 @@
+{
+    "ANG123": {
+        "nama": "Risa Permata Sari",
+        "jenis_anggota": 1
+    },
+    "ANG456": {
+        "nama": "Andi Gunawan",
+        "jenis_anggota": 2
+    },
+    "ANG789": {
+        "nama": "Cahyo NF",
+        "jenis_anggota": 1
+    },
+    "ANG011": {
+        "nama": "Dewi Kania",
+        "jenis_anggota": 2
+    },
+    "ANG333": {
+        "nama": "Edo Satria",
+        "jenis_anggota": 1
+    },
+    "ANG820": {
+        "nama": "Naufal arif",
+        "jenis_anggota": 2
+    }
+}
