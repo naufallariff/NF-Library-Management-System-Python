@@ -1,1 +1,11 @@
-__pycache__
+.gitignore
+
+# Byte-compiled / optimalization files
+# Abaikan folder dan file cache yang dibuat oleh Python
+__pycache__/
+*.py[co]
+
+# Python IDE/Editor-specific files (Optional but recommended)
+.vscode/  # VS Code-specific files
+.idea/    # PyCharm/IntelliJ files
+*.swp     # Vim swap files
