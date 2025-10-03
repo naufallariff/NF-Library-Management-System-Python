@@ -1,7 +1,6 @@
 import sys
 import signal 
 
-# Import fungsi dari handlers yang berbeda
 from handlers.anggota_handler import (
     create_anggota, update_anggota, delete_anggota, view_anggota_list
 )
@@ -11,43 +10,56 @@ from handlers.buku_handler import (
 from handlers.transaction_handler import (
     create_loan, complete_return, delete_loan_entry, view_loan_list
 )
+from handlers.history_handler import view_history_list 
 
-from core.utils import clear_screen # clear_screen dari core/utils
+from core.utils import clear_screen 
 
-# Handler untuk interupsi keyboard (Ctrl+C)
 def signal_handler(sig, frame):
     """Cleanly exits the application upon Ctrl+C interrupt."""
-    print('\n[APPLICATION STOPPED] Ctrl+C detected. Goodbye.')
+    print('\n\n======================================================')
+    print('|| APLIKASI DIHENTIKAN. Terima kasih atas kunjungan Anda! ||')
+    print('======================================================')
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
 
+def print_menu_header(title):
+    """Mencetak header menu dengan desain yang lebih baik."""
+    print('\n' + "="*50)
+    print(f"| {title.center(46)} |")
+    print("="*50)
+
 def menu():
     clear_screen()
     while True:
-        print('\n***** NF LIBRARY MANAGEMENT SYSTEM (Modular) *****')
-        print('MENU:')
-        print('--- [ ANGGOTA ] ---')
-        print('[1] Create New Member (C)')
-        print('[2] Edit Member Data (U)')
-        print('[3] Delete Member (D)')
-        print('[4] View Member List (R)')
-        print('--- [ BUKU ] ---')
-        print('[5] Create New Book (C)')
-        print('[6] Edit Book Data (U)')
-        print('[7] Delete Book (D)')
-        print('[8] View Book List (R)')
-        print('--- [ TRANSAKSI ] ---')
-        print('[A] Create Loan (Pinjam)')
-        print('[B] Complete Return (Kembalikan)')
-        print('[C] Delete Loan Entry (Forced Return)')
-        print('[D] View Active Loans (R)')
-        print('--- [ SISTEM ] ---')
-        print('[S] Clear Screen')
-        print('[X] Exit Application')
+        print_menu_header("NF LIBRARY MANAGEMENT SYSTEM (MODULAR)")
+        
+        print('| --- [ MANAJEMEN ANGGOTA (MEMBER CRUD) ] ---          |')
+        print('| [1] Buat Anggota Baru (Create)                       |')
+        print('| [2] Edit Data Anggota (Update)                       |')
+        print('| [3] Hapus Anggota (Delete)                           |')
+        print('| [4] Lihat Daftar Anggota (Read)                      |')
+        print('|' + '-'*48 + '|')
+        print('| --- [ MANAJEMEN BUKU (BOOK CRUD) ] ---               |')
+        print('| [5] Buat Buku Baru (Create)                          |')
+        print('| [6] Edit Data Buku (Update)                          |')
+        print('| [7] Hapus Buku (Delete)                              |')
+        print('| [8] Lihat Daftar Buku (Read)                         |')
+        print('|' + '-'*48 + '|')
+        print('| --- [ TRANSAKSI & RIWAYAT ] ---                      |')
+        print('| [A] Buat Pinjaman (Loan)                             |')
+        print('| [B] Selesaikan Pengembalian (Return)                 |')
+        print('| [C] Hapus Entri Pinjaman (Forced Return)             |')
+        print('| [D] Lihat Pinjaman Aktif                             |')
+        print('| [E] Lihat Riwayat Transaksi (History)                |') 
+        print('|' + '-'*48 + '|')
+        print('| --- [ SISTEM ] ---                                   |')
+        print('| [S] Clear Screen                                     |')
+        print('| [X] KELUAR APLIKASI                                  |')
+        print("="*50)
         
         try:
-            pilih_menu = input('Enter Menu Choice: ').strip().upper()
+            pilih_menu = input('>>> Masukkan Pilihan Menu Anda: ').strip().upper()
             
             # Pilihan Angka (Anggota & Buku)
             if pilih_menu == '1': create_anggota()
@@ -64,20 +76,20 @@ def menu():
             elif pilih_menu == 'B': complete_return()
             elif pilih_menu == 'C': delete_loan_entry()
             elif pilih_menu == 'D': view_loan_list()
+            elif pilih_menu == 'E': view_history_list()
             elif pilih_menu == 'S': clear_screen(); continue
             elif pilih_menu == 'X':
-                print('Thank you for using the system. Have a good day!')
+                print('\nSistem sedang dimatikan...')
                 break
             else:
-                print('Invalid choice. Please try again.')
+                print('\n[WARNING] Pilihan tidak valid. Silakan coba lagi.')
                 
-            input("\nPress ENTER to return to the menu...")
+            input("\nTekan ENTER untuk kembali ke menu...")
             clear_screen()
 
         except Exception as e:
-            # Catching general errors from all handlers
-            print(f"An unexpected application error occurred: {e}")
-            input("\nPress ENTER to return to the menu...")
+            print(f"\n[ERROR FATAL] Terjadi kesalahan aplikasi yang tidak terduga: {e}")
+            input("\nTekan ENTER untuk kembali ke menu...")
             clear_screen()
 
 if __name__ == "__main__":

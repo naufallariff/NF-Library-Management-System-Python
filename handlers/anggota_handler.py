@@ -5,7 +5,7 @@ from core.validation import validate_input_str
 # Helper untuk Anggota (Cari & Pilih)
 def _prompt_and_select_anggota(data):
     """Membantu pengguna mencari dan memilih anggota."""
-    from core.validation import search_and_select # Import lokal untuk menghindari circular dependency
+    from core.validation import search_and_select
     
     key_attr = 'nama'
     search_prompt = "Cari Nama Anggota (atau 'X' untuk batal): "

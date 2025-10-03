@@ -1,3 +1,5 @@
+# core/data_manager.py (Diperbarui)
+
 import json
 import os
 
@@ -6,6 +8,7 @@ DATA_DIR = 'data'
 ANGGOTA_FILE = os.path.join(DATA_DIR, 'anggota.json')
 BUKU_FILE = os.path.join(DATA_DIR, 'buku.json')
 PEMINJAMAN_FILE = os.path.join(DATA_DIR, 'peminjaman.json')
+HISTORY_FILE = os.path.join(DATA_DIR, 'history.json') 
 
 def load_data(filename):
     """Membaca data dari file JSON."""
@@ -32,17 +35,18 @@ def save_data(data, filename):
     except IOError as e:
         print(f"Error: Could not save data to {os.path.basename(filename)}: {e}")
 
-# Fungsi Helper tetap sama, hanya memanggil konstanta file yang baru
 def get_all_data():
-    """Mengambil semua data aplikasi dari disk."""
+    """Mengambil semua data aplikasi dari disk, termasuk history."""
     return {
         'anggota': load_data(ANGGOTA_FILE),
         'buku': load_data(BUKU_FILE),
-        'peminjaman': load_data(PEMINJAMAN_FILE)
+        'peminjaman': load_data(PEMINJAMAN_FILE),
+        'history': load_data(HISTORY_FILE) 
     }
 
 def save_all_data(data):
-    """Menyimpan semua data aplikasi ke disk."""
+    """Menyimpan semua data aplikasi ke disk, termasuk history."""
     save_data(data['anggota'], ANGGOTA_FILE)
     save_data(data['buku'], BUKU_FILE)
     save_data(data['peminjaman'], PEMINJAMAN_FILE)
+    save_data(data['history'], HISTORY_FILE)

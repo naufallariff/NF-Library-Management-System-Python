@@ -4,8 +4,8 @@ from core.validation import validate_input_str, validate_input_int
 
 # Helper untuk Buku (Cari & Pilih)
 def _prompt_and_select_buku(data):
-    """Membantu pengguna mencari dan memilih buku."""
-    from core.validation import search_and_select # Import lokal untuk menghindari circular dependency
+    """Membantu pengguna mencari dan memilih buku berdasarkan kata kunci."""
+    from core.validation import search_and_select 
     
     key_attr = 'judul'
     search_prompt = "Cari Judul Buku (atau 'X' untuk batal): "
@@ -31,12 +31,12 @@ def create_buku():
     data = get_all_data()
     kode_buku = generate_kode_buku(penulis)
     
-    print(f"\nConfirm Book (Code: {kode_buku}, Title: {judul}, Stock: {stok})?")
+    print(f"\nKonfirmasi Buku (Kode: {kode_buku}, Judul: {judul}, Stok: {stok})?")
     yakin = input("(Y/T): ").upper()
     
     if yakin == "Y":
         data['buku'][kode_buku] = {'judul': judul, 'penulis': penulis, 'stok': stok}
-        save_all_all_data(data)
+        save_all_data(data) # TYPO DIBENERKAN DI SINI
         print(f'Book added successfully: {judul} with code {kode_buku}.')
     else:
         print('Operation cancelled.')
@@ -101,7 +101,7 @@ def update_buku():
 
 # --- DELETE ---
 def delete_buku():
-    """Menghapus buku, dengan cek konflik peminjaman."""
+    """Menghapus buku, dengan cek konflik peminjaman aktif."""
     clear_screen()
     print('\n*** HAPUS DATA BUKU ***')
     data = get_all_data()
